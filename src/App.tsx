@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ParamsForm from "./components/ParamsForm";
 import "./App.css";
 import Canvas from "./components/Canvas";
@@ -6,6 +6,8 @@ import Canvas from "./components/Canvas";
 const App = () => {
   const [optNum, setOptNum] = React.useState(5);
   const [optTransp, setOptTransp] = React.useState(500);
+
+  const canvasRef = useRef<any>(null);
 
   return (
     <div>
@@ -15,8 +17,14 @@ const App = () => {
         valTransp={optTransp}
         setTransp={setOptTransp}
       />
-      <Canvas valObjNum={optNum} valTransp={optTransp} />
-      <button onClick={(gfg) => console.log("ddd")}>save image</button>
+      <Canvas ref={canvasRef} valObjNum={optNum} valTransp={optTransp} />
+      <button
+        onClick={(ret) => {
+          canvasRef.current?.drawImage();
+        }}
+      >
+        save image
+      </button>
     </div>
   );
 };

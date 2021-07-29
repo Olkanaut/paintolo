@@ -1,4 +1,11 @@
-import React, { FC, useEffect, useRef } from "react";
+import React, {
+  FC,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+} from "react";
 
 interface ParamsFormProps {
   valObjNum: number;
@@ -80,46 +87,59 @@ class DrawingTools {
     this.createShapes(props.valObjNum, props.valTransp);
     this.shapes.forEach((shape) => shape.print(this.ctx));
   }
-
-  saveImageAsPNG() {
-    const elemId: string = "mycanvas";
-    const fileName = "gen01";
-    const canvasElement = this.ref.current;
-    if (!canvasElement) return;
-    const MIME_TYPE = "image/png";
-    const imgURL = canvasElement.toDataURL(MIME_TYPE);
-    const dlLink = document.createElement("a");
-    dlLink.download = fileName;
-    dlLink.href = imgURL;
-    dlLink.dataset.downloadurl = [MIME_TYPE, dlLink.download, dlLink.href].join(
-      ":"
-    );
-
-    document.body.appendChild(dlLink);
-    dlLink.click();
-    document.body.removeChild(dlLink);
-
-    // showActionInfo('logSave', 'Saved', 3000);
-  }
 }
 
-const Canvas: FC<ParamsFormProps> = (props) => {
-  const ref = React.useRef<HTMLCanvasElement>(null);
+function saveImageAsPNG(canvas: HTMLCanvasElement) {
+  const elemId: string = "mycanvas";
+  const fileName = "gen01";
+  const canvasElement = canvas;
+  if (!canvasElement) return;
+  const MIME_TYPE = "image/png";
+  const imgURL = canvasElement.toDataURL(MIME_TYPE);
+  const dlLink = document.createElement("a");
+  dlLink.download = fileName;
+  dlLink.href = imgURL;
+  dlLink.dataset.downloadurl = [MIME_TYPE, dlLink.download, dlLink.href].join(
+    ":"
+  );
 
-  useEffect(() => {
-    if (ref.current) {
-      const res = ref.current.getContext("2d");
-      if (!res || !(res instanceof CanvasRenderingContext2D)) {
-        throw new Error("error with canvas rendering");
+  document.body.appendChild(dlLink);
+  dlLink.click();
+  document.body.removeChild(dlLink);
+}
+
+const Canvas = forwardRef<{ drawImage: Function }, ParamsFormProps>(
+  (props, forwardedRef) => {
+    const ref = React.useRef<HTMLCanvasElement>(null);
+    const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+
+    useEffect(() => {
+      if (ref.current !== null) {
+        setCtx(ref.current.getContext("2d"));
       }
-      const ctx: CanvasRenderingContext2D = res;
-      const drawingTools = new DrawingTools(ref, ctx); //
-      drawingTools.clearCanvas();
-      drawingTools.draw(props);
-    }
-  });
+    }, [ref.current]);
 
-  return <canvas ref={ref} width="700" height="700"></canvas>;
-};
+    useImperativeHandle(forwardedRef, () => ({
+      drawImage: () => {
+        if (ctx) return saveImageAsPNG(ctx?.canvas);
+      },
+    }));
+
+    useEffect(() => {
+      if (ref.current) {
+        const res = ref.current.getContext("2d");
+        if (!res || !(res instanceof CanvasRenderingContext2D)) {
+          throw new Error("error with canvas rendering");
+        }
+        const ctx: CanvasRenderingContext2D = res;
+        const drawingTools = new DrawingTools(ref, ctx); //
+        drawingTools.clearCanvas();
+        drawingTools.draw(props);
+      }
+    });
+
+    return <canvas ref={ref} width="700" height="700"></canvas>;
+  }
+);
 
 export default Canvas;

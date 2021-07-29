@@ -1,14 +1,5 @@
 import { ChangeEventHandler, FC } from "react";
 
-// interface A {
-//   foo: string;
-// }
-// type B = {foo: string} & {bar: number};
-
-// type A = {foo: string}
-// type B = {bar: number} & A
-
-// interface InputFieldProps extends B {
 interface InputFieldProps {
   val: number;
   max: number;
