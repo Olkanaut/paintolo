@@ -27,73 +27,80 @@ class Shape {
   }
 }
 
-// class DrawingTools {
-//   ctx: CanvasRenderingContext2D;
+class DrawingTools {
+  ref: React.RefObject<HTMLCanvasElement>;
+  ctx: CanvasRenderingContext2D;
+  shapes: Shape[] = [];
 
-//   constructor(context: CanvasRenderingContext2D) {
-//     this.ctx = context;
-//   }
-
-//   clearCanvas() {
-//     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-//   }
-
-//   draw(props: ParamsFormProps) {
-//     let shapes = createShapes(props.valObjNum, props.valTransp);
-//     shapes.forEach((shape) => shape.print(ctx));
-//     // drawList(this.ctx, shapes);
-//   }
-// }
-
-function createShapes(numOfFigures: number, transparency: number) {
-  let shapes: Shape[] = [];
-  Math.random();
-  function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min); //[min, max)
+  constructor(
+    ref: React.RefObject<HTMLCanvasElement>,
+    context: CanvasRenderingContext2D
+  ) {
+    this.ref = ref;
+    this.ctx = context;
+    this.shapes = [];
   }
 
-  let randNums = [];
-  for (let i = 0; i < numOfFigures * 10; ++i)
-    randNums[i] = getRandomInt(10, 255);
+  createShapes(numOfFigures: number, transparency: number) {
+    Math.random();
+    function getRandomInt(min: number, max: number) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min) + min); //[min, max)
+    }
 
-  for (let i = 0; i < numOfFigures; ++i) {
-    let color =
-      "rgba(0,0," +
-      randNums[i * 10] +
-      "," +
-      randNums[i * 10 + 5] / transparency +
-      ")";
-    shapes.push(
-      new Shape(
-        randNums[i * 10 + 1],
-        randNums[i * 10 + 2],
-        randNums[i * 10 + 3],
-        randNums[i * 10 + 4],
-        color
-      )
-    ); //'rgba(0,0,255,0.5)')
+    let randNums = [];
+    for (let i = 0; i < numOfFigures * 10; ++i)
+      randNums[i] = getRandomInt(10, 255);
+
+    for (let i = 0; i < numOfFigures; ++i) {
+      let color =
+        "rgba(0,0," +
+        randNums[i * 10] +
+        "," +
+        randNums[i * 10 + 5] / transparency +
+        ")";
+      this.shapes.push(
+        new Shape(
+          randNums[i * 10 + 1],
+          randNums[i * 10 + 2],
+          randNums[i * 10 + 3],
+          randNums[i * 10 + 4],
+          color
+        )
+      ); //'rgba(0,0,255,0.5)')
+    }
   }
-  return shapes;
-}
 
-function drawList(ctx: CanvasRenderingContext2D, shapes: Shape[]) {
-  shapes.forEach((shape) => shape.print(ctx));
-}
+  clearCanvas() {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  }
 
-function draw(ctx: CanvasRenderingContext2D, props: ParamsFormProps) {
-  let shapes = createShapes(props.valObjNum, props.valTransp);
-  drawList(ctx, shapes);
-}
+  draw(props: ParamsFormProps) {
+    this.createShapes(props.valObjNum, props.valTransp);
+    this.shapes.forEach((shape) => shape.print(this.ctx));
+  }
 
-function createScene(ctx: CanvasRenderingContext2D, props: ParamsFormProps) {
-  // let properties = getUpdatesFromForm();
-  draw(ctx, props);
-}
+  saveImageAsPNG() {
+    const elemId: string = "mycanvas";
+    const fileName = "gen01";
+    const canvasElement = this.ref.current;
+    if (!canvasElement) return;
+    const MIME_TYPE = "image/png";
+    const imgURL = canvasElement.toDataURL(MIME_TYPE);
+    const dlLink = document.createElement("a");
+    dlLink.download = fileName;
+    dlLink.href = imgURL;
+    dlLink.dataset.downloadurl = [MIME_TYPE, dlLink.download, dlLink.href].join(
+      ":"
+    );
 
-function clearCanvas(ctx: CanvasRenderingContext2D) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    document.body.appendChild(dlLink);
+    dlLink.click();
+    document.body.removeChild(dlLink);
+
+    // showActionInfo('logSave', 'Saved', 3000);
+  }
 }
 
 const Canvas: FC<ParamsFormProps> = (props) => {
@@ -103,14 +110,12 @@ const Canvas: FC<ParamsFormProps> = (props) => {
     if (ref.current) {
       const res = ref.current.getContext("2d");
       if (!res || !(res instanceof CanvasRenderingContext2D)) {
-        throw new Error("error CanvasRenderingContext2D");
+        throw new Error("error with canvas rendering");
       }
       const ctx: CanvasRenderingContext2D = res;
-    //   const tools = new DrawingTools(ctx);
-      clearCanvas(ctx);
-      draw(ctx, props);
-
-      console.log("ctx:", ctx);
+      const drawingTools = new DrawingTools(ref, ctx); //
+      drawingTools.clearCanvas();
+      drawingTools.draw(props);
     }
   });
 

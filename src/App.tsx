@@ -1,11 +1,11 @@
+import React from "react";
 import ParamsForm from "./components/ParamsForm";
 import "./App.css";
-import React from "react";
 import Canvas from "./components/Canvas";
 
 const App = () => {
   const [optNum, setOptNum] = React.useState(5);
-  const [optTransp, setOptTransp] = React.useState(700);
+  const [optTransp, setOptTransp] = React.useState(500);
 
   return (
     <div>
@@ -16,6 +16,7 @@ const App = () => {
         setTransp={setOptTransp}
       />
       <Canvas valObjNum={optNum} valTransp={optTransp} />
+      <button onClick={(gfg) => console.log("ddd")}>save image</button>
     </div>
   );
 };

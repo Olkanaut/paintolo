@@ -22,8 +22,8 @@ ReactDOM.render(
 // r.innerHTML = '<h1>hello</h1>';
 reportWebVitals();
 
-let a = 1;
+// let a = 1;
 
-function b() {
-  return a;
-}
+// function b() {
+//   return a;
+// }

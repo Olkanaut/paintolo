@@ -40,6 +40,3 @@ const InputField: FC<InputFieldProps> = (props) => {
 };
 
 export default InputField;
-{
-  /* <label htmlFor="some-input"> */
-}
