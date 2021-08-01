@@ -1,7 +1,5 @@
 import React, {
-  FC,
   useEffect,
-  useRef,
   forwardRef,
   useImperativeHandle,
   useState,
@@ -32,6 +30,10 @@ class Shape {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.pos.x, this.pos.y, this.dims.x, this.dims.y);
   }
+
+  setColor(newColor: string) {
+    this.color = newColor;
+  }
 }
 
 class DrawingTools {
@@ -48,34 +50,40 @@ class DrawingTools {
     this.shapes = [];
   }
 
+  getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //[min, max)
+  }
+
+  getRandomColor(transparency: number) {
+    Math.random();
+    let color =
+      "rgba(0,0," +
+      this.getRandomInt(10, 255) +
+      "," +
+      this.getRandomInt(10, 255) / transparency +
+      ")";
+    return color;
+  }
+
   createShapes(numOfFigures: number, transparency: number) {
     Math.random();
-    function getRandomInt(min: number, max: number) {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min) + min); //[min, max)
-    }
 
     let randNums = [];
-    for (let i = 0; i < numOfFigures * 10; ++i)
-      randNums[i] = getRandomInt(10, 255);
+    for (let i = 0; i < numOfFigures * 4; ++i)
+      randNums[i] = this.getRandomInt(10, 255);
 
     for (let i = 0; i < numOfFigures; ++i) {
-      let color =
-        "rgba(0,0," +
-        randNums[i * 10] +
-        "," +
-        randNums[i * 10 + 5] / transparency +
-        ")";
       this.shapes.push(
         new Shape(
-          randNums[i * 10 + 1],
-          randNums[i * 10 + 2],
-          randNums[i * 10 + 3],
-          randNums[i * 10 + 4],
-          color
+          randNums[i * 4],
+          randNums[i * 4 + 1],
+          randNums[i * 4 + 2],
+          randNums[i * 4 + 3],
+          this.getRandomColor(transparency)
         )
-      ); //'rgba(0,0,255,0.5)')
+      );
     }
   }
 
@@ -83,15 +91,27 @@ class DrawingTools {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
+  drawList() {
+    this.shapes.forEach((shape) => shape.print(this.ctx));
+  }
+
   draw(props: ParamsFormProps) {
     this.createShapes(props.valObjNum, props.valTransp);
-    this.shapes.forEach((shape) => shape.print(this.ctx));
+    this.drawList();
+  }
+
+  updateColors(transparency: number) {
+    console.log("sh", this.shapes);
+    console.log("sh[0]", this.shapes[0]);
+
+    this.shapes.forEach((shape) =>
+      shape.setColor(this.getRandomColor(transparency))
+    );
   }
 }
 
 function saveImageAsPNG(canvas: HTMLCanvasElement) {
-  const elemId: string = "mycanvas";
-  const fileName = "gen01";
+  const fileName = "gen";
   const canvasElement = canvas;
   if (!canvasElement) return;
   const MIME_TYPE = "image/png";
@@ -102,44 +122,67 @@ function saveImageAsPNG(canvas: HTMLCanvasElement) {
   dlLink.dataset.downloadurl = [MIME_TYPE, dlLink.download, dlLink.href].join(
     ":"
   );
-
   document.body.appendChild(dlLink);
   dlLink.click();
   document.body.removeChild(dlLink);
 }
 
-const Canvas = forwardRef<{ drawImage: Function }, ParamsFormProps>(
-  (props, forwardedRef) => {
-    const ref = React.useRef<HTMLCanvasElement>(null);
-    const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+const Canvas = forwardRef<
+  { saveImage: Function; changeSeed: Function },
+  ParamsFormProps
+>((props, forwardedRef) => {
+  const ref = React.useRef<HTMLCanvasElement>(null);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+  // const [shapes, setShapes] = useState<Shape[] | null>(null);
 
-    useEffect(() => {
-      if (ref.current !== null) {
-        setCtx(ref.current.getContext("2d"));
-      }
-    }, [ref.current]);
-
-    useImperativeHandle(forwardedRef, () => ({
-      drawImage: () => {
-        if (ctx) return saveImageAsPNG(ctx?.canvas);
-      },
-    }));
-
-    useEffect(() => {
-      if (ref.current) {
-        const res = ref.current.getContext("2d");
-        if (!res || !(res instanceof CanvasRenderingContext2D)) {
-          throw new Error("error with canvas rendering");
-        }
-        const ctx: CanvasRenderingContext2D = res;
-        const drawingTools = new DrawingTools(ref, ctx); //
-        drawingTools.clearCanvas();
-        drawingTools.draw(props);
-      }
-    });
-
-    return <canvas ref={ref} width="700" height="700"></canvas>;
+  let drawingTools: DrawingTools;
+  if (ctx) {
+    drawingTools = new DrawingTools(ref, ctx);
   }
-);
+
+  useEffect(() => {
+    if (ref.current !== null) {
+      setCtx(ref.current.getContext("2d"));
+    }
+  }, [ctx]); ///ref.current
+
+  useImperativeHandle(forwardedRef, () => ({
+    saveImage: () => {
+      if (ctx) return saveImageAsPNG(ctx.canvas);
+    },
+
+    changeSeed: () => {
+      if (ctx) {
+        drawingTools.updateColors(props.valTransp);
+        drawingTools.clearCanvas();
+        drawingTools.drawList();
+      }
+    },
+  }));
+
+  useEffect(() => {
+    if (ctx) {
+      drawingTools.clearCanvas();
+      drawingTools.draw(props);
+    }
+  });
+
+  // // ////bug effect
+  //   useEffect(() => {
+  //     // if (ref.current  && drawingTools !== undefined){
+  //     if (ctx != null) {
+  //       // ref.current  && drawingTools !== undefined) {
+  //       // let newShapes = drawingTools.updateColors();
+  //       // drawingTools.clearCanvas();
+  //       // drawingTools.drawList(newShapes);
+  //       drawingTools.updateColors();
+  //       drawingTools.clearCanvas();
+  //       drawingTools.drawList();
+  //       // setCtx(ref.current.getContext("2d"));
+  //     }
+  //   }, [ctx, props.valTransp]);
+
+  return <canvas ref={ref} width="510" height="510"></canvas>;
+});
 
 export default Canvas;

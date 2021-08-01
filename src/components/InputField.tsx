@@ -16,7 +16,7 @@ const InputField: FC<InputFieldProps> = (props) => {
   };
 
   return (
-    <label>
+    <label className="inputLabel">
       {props.label}
       <input
         type="number"
