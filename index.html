@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>prouns generator</title>
+</head>
+
+<body>
+
+<h1>prouns generator</h1>
+  
+  <canvas id="canvas" height="500" width="500"></canvas>
+
+
+  <form name="generator" id="generatorID">
+    <table>
+      <tr>
+        <td>Number of figures</td>
+        <td>
+          <input name="numOfFigures" type="number" value="5">
+        </td>
+      </tr>
+
+      <tr>
+        <td>Transparency</td>
+        <td>
+            <input name="transparency" type="number" value="700">
+          </td>
+      </tr>
+    </table>
+    <br>
+    <button type="submit">DRAW</button> 
+  </form>
+  <p id="log"></p>
+
+  <button onclick="exportCanvasAsPNG('canvas', 'name')">SAVE</button> 
+  <p id="logSave"></p>
+
+
+  <script src="app.js"></script>
+</body>
+
+</html>
