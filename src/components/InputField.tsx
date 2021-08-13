@@ -1,18 +1,18 @@
 import { ChangeEventHandler, FC } from "react";
 
 interface InputFieldProps {
-  val: number;
+  value: number;
   max: number;
   min: number;
   step?: number;
-  setVal: (v: number) => void;
+  setValue: (v: number) => void;
   label: string;
 }
 
 const InputField: FC<InputFieldProps> = (props) => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const newValue = parseInt(event.currentTarget.value, 10);
-    props.setVal(newValue);
+    props.setValue(newValue);
   };
 
   return (
@@ -20,7 +20,7 @@ const InputField: FC<InputFieldProps> = (props) => {
       {props.label}
       <input
         type="number"
-        value={props.val}
+        value={props.value}
         min={props.min}
         max={props.max}
         step={props.step}

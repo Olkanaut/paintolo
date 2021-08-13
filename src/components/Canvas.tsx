@@ -5,9 +5,12 @@ import React, {
   useState,
 } from "react";
 
+import { useSelector } from "react-redux";
+import { mapStateToProps } from "../redux-store";
+
 interface ParamsFormProps {
-  valObjNum: number;
-  valTransp: number;
+  numberOfFigures: number;
+  transparency: number;
 }
 
 interface XY {
@@ -53,7 +56,7 @@ class DrawingTools {
   getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min); //[min, max)
+    return Math.floor(Math.random() * (max - min) + min);
   }
 
   getRandomColor(transparency: number) {
@@ -62,14 +65,12 @@ class DrawingTools {
       "rgba(0,0," +
       this.getRandomInt(10, 255) +
       "," +
-      this.getRandomInt(10, 255) / transparency +
+      this.getRandomInt(10, 255) / transparency / 20 +
       ")";
     return color;
   }
 
   createShapes(numOfFigures: number, transparency: number) {
-    Math.random();
-
     let randNums = [];
     for (let i = 0; i < numOfFigures * 4; ++i)
       randNums[i] = this.getRandomInt(10, 255);
@@ -96,14 +97,11 @@ class DrawingTools {
   }
 
   draw(props: ParamsFormProps) {
-    this.createShapes(props.valObjNum, props.valTransp);
+    this.createShapes(props.numberOfFigures, props.transparency);
     this.drawList();
   }
 
   updateColors(transparency: number) {
-    console.log("sh", this.shapes);
-    console.log("sh[0]", this.shapes[0]);
-
     this.shapes.forEach((shape) =>
       shape.setColor(this.getRandomColor(transparency))
     );
@@ -127,62 +125,50 @@ function saveImageAsPNG(canvas: HTMLCanvasElement) {
   document.body.removeChild(dlLink);
 }
 
-const Canvas = forwardRef<
-  { saveImage: Function; changeSeed: Function },
-  ParamsFormProps
->((props, forwardedRef) => {
-  const ref = React.useRef<HTMLCanvasElement>(null);
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-  // const [shapes, setShapes] = useState<Shape[] | null>(null);
+const Canvas = forwardRef<{ saveImage: Function; changeSeed: Function }>(
+  (props, forwardedRef) => {
+    const ref = React.useRef<HTMLCanvasElement>(null);
+    const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
-  let drawingTools: DrawingTools;
-  if (ctx) {
-    drawingTools = new DrawingTools(ref, ctx);
-  }
+    const state = useSelector(mapStateToProps);
 
-  useEffect(() => {
-    if (ref.current !== null) {
-      setCtx(ref.current.getContext("2d"));
-    }
-  }, [ctx]); ///ref.current
-
-  useImperativeHandle(forwardedRef, () => ({
-    saveImage: () => {
-      if (ctx) return saveImageAsPNG(ctx.canvas);
-    },
-
-    changeSeed: () => {
-      if (ctx) {
-        drawingTools.updateColors(props.valTransp);
-        drawingTools.clearCanvas();
-        drawingTools.drawList();
-      }
-    },
-  }));
-
-  useEffect(() => {
+    let drawingTools: DrawingTools;
     if (ctx) {
-      drawingTools.clearCanvas();
-      drawingTools.draw(props);
+      drawingTools = new DrawingTools(ref, ctx);
     }
-  });
 
-  // // ////bug effect
-  //   useEffect(() => {
-  //     // if (ref.current  && drawingTools !== undefined){
-  //     if (ctx != null) {
-  //       // ref.current  && drawingTools !== undefined) {
-  //       // let newShapes = drawingTools.updateColors();
-  //       // drawingTools.clearCanvas();
-  //       // drawingTools.drawList(newShapes);
-  //       drawingTools.updateColors();
-  //       drawingTools.clearCanvas();
-  //       drawingTools.drawList();
-  //       // setCtx(ref.current.getContext("2d"));
-  //     }
-  //   }, [ctx, props.valTransp]);
+    useEffect(() => {
+      if (ref.current !== null) {
+        setCtx(ref.current.getContext("2d"));
+      }
+    }, [ctx]);
 
-  return <canvas ref={ref} width="510" height="510"></canvas>;
-});
+    useImperativeHandle(forwardedRef, () => ({
+      saveImage: () => {
+        if (ctx) return saveImageAsPNG(ctx.canvas);
+      },
+
+      changeSeed: () => {
+        if (ctx) {
+          drawingTools.updateColors(state.transparency);
+          drawingTools.clearCanvas();
+          drawingTools.drawList();
+        }
+      },
+    }));
+
+    useEffect(() => {
+      if (ctx) {
+        drawingTools.clearCanvas();
+        drawingTools.draw({
+          numberOfFigures: state.numberOfFigures,
+          transparency: state.transparency,
+        });
+      }
+    });
+
+    return <canvas ref={ref} width="510" height="510"></canvas>;
+  }
+);
 
 export default Canvas;
