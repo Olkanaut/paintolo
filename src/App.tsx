@@ -4,9 +4,8 @@ import "./App.css";
 import Canvas from "./components/Canvas";
 
 const App = () => {
-  const [optNum, setOptNum] = React.useState(5);
-  const [optTransp, setOptTransp] = React.useState(400);
-  // const [optSeed, setOptSeed] = React.useState(500);
+  const [numberOfFigures, setNumberOfFigures] = React.useState(5);
+  const [transparency, setTransparency] = React.useState(16);
 
   const canvasRef = useRef<any>(null);
   const link = (
@@ -19,20 +18,22 @@ const App = () => {
     <div className="App">
       <h1 className="headline">Supreme Generator</h1>
       <p className="intro">
-        The project was inspired by artworks of Russian suprematist El Lissitzky who introduced
-        a {link} between 1919 and 1927 named by the word 'Proun', an acronym for
-        'project of the affirmation of the new'
+        The project was inspired by artworks of Russian suprematist El Lissitzky
+        who introduced a {link} between 1919 and 1927 named by the word 'Proun',
+        an acronym for 'project of the affirmation of the new'
       </p>
       <ParamsForm
-        valObjNum={optNum}
-        setObjNum={setOptNum}
-        valTransp={optTransp}
-        setTransp={setOptTransp}
-        // valSeed={optSeed}
-        // setSeed={ (ret) => canvasRef.current?.changeSeed() }
+        numberOfFigures={numberOfFigures}
+        setNumberOfFigures={setNumberOfFigures}
+        transparency={transparency}
+        setTransparency={setTransparency}
         className="container"
       />
-      <Canvas ref={canvasRef} valObjNum={optNum} valTransp={optTransp} />
+      <Canvas
+        ref={canvasRef}
+        numberOfFigures={numberOfFigures}
+        transparency={transparency}
+      />
 
       <b className="container">
         <button
@@ -53,7 +54,6 @@ const App = () => {
           save image
         </button>
       </b>
-      {/* <canvas className="gradient" width="300" height="300"></canvas> */}
     </div>
   );
 };

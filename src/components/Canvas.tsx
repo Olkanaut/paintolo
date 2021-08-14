@@ -6,8 +6,8 @@ import React, {
 } from "react";
 
 interface ParamsFormProps {
-  valObjNum: number;
-  valTransp: number;
+  numberOfFigures: number;
+  transparency: number;
 }
 
 interface XY {
@@ -62,7 +62,7 @@ class DrawingTools {
       "rgba(0,0," +
       this.getRandomInt(10, 255) +
       "," +
-      this.getRandomInt(10, 255) / transparency +
+      this.getRandomInt(10, 255) / transparency / 20 +
       ")";
     return color;
   }
@@ -96,7 +96,7 @@ class DrawingTools {
   }
 
   draw(props: ParamsFormProps) {
-    this.createShapes(props.valObjNum, props.valTransp);
+    this.createShapes(props.numberOfFigures, props.transparency);
     this.drawList();
   }
 
@@ -133,7 +133,6 @@ const Canvas = forwardRef<
 >((props, forwardedRef) => {
   const ref = React.useRef<HTMLCanvasElement>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-  // const [shapes, setShapes] = useState<Shape[] | null>(null);
 
   let drawingTools: DrawingTools;
   if (ctx) {
@@ -144,7 +143,7 @@ const Canvas = forwardRef<
     if (ref.current !== null) {
       setCtx(ref.current.getContext("2d"));
     }
-  }, [ctx]); ///ref.current
+  }, [ctx]);
 
   useImperativeHandle(forwardedRef, () => ({
     saveImage: () => {
@@ -153,7 +152,7 @@ const Canvas = forwardRef<
 
     changeSeed: () => {
       if (ctx) {
-        drawingTools.updateColors(props.valTransp);
+        drawingTools.updateColors(props.transparency);
         drawingTools.clearCanvas();
         drawingTools.drawList();
       }
@@ -166,22 +165,6 @@ const Canvas = forwardRef<
       drawingTools.draw(props);
     }
   });
-
-  // // ////bug effect
-  //   useEffect(() => {
-  //     // if (ref.current  && drawingTools !== undefined){
-  //     if (ctx != null) {
-  //       // ref.current  && drawingTools !== undefined) {
-  //       // let newShapes = drawingTools.updateColors();
-  //       // drawingTools.clearCanvas();
-  //       // drawingTools.drawList(newShapes);
-  //       drawingTools.updateColors();
-  //       drawingTools.clearCanvas();
-  //       drawingTools.drawList();
-  //       // setCtx(ref.current.getContext("2d"));
-  //     }
-  //   }, [ctx, props.valTransp]);
-
   return <canvas ref={ref} width="510" height="510"></canvas>;
 });
 

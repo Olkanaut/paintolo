@@ -2,12 +2,10 @@ import { FC } from "react";
 import InputField from "./InputField";
 
 interface ParamsFormProps {
-  valObjNum: number;
-  valTransp: number;
-  // valSeed: number;
-  setObjNum: (value: number) => void;
-  setTransp: (value: number) => void;
-  // setSeed: (value: number) => void;
+  numberOfFigures: number;
+  transparency: number;
+  setNumberOfFigures: (value: number) => void;
+  setTransparency: (value: number) => void;
   className: string;
 }
 
@@ -16,26 +14,19 @@ const ParamsForm: FC<ParamsFormProps> = (props) => {
     <form>
       <InputField
         label="number of figures"
-        val={props.valObjNum}
+        value={props.numberOfFigures}
         min={1}
         max={100}
-        setVal={props.setObjNum}
+        setValue={props.setNumberOfFigures}
       />
       <InputField
         label="ephemerality"
-        val={props.valTransp}
+        value={props.transparency}
         min={1}
-        max={10000}
-        step={100}
-        setVal={props.setTransp}
+        max={100}
+        step={5}
+        setValue={props.setTransparency}
       />
-      {/* <InputField
-        label="seed"
-        val={props.valSeed}
-        min={1}
-        max={10000}
-        setVal={props.setSeed}
-      /> */}
     </form>
   );
 };
