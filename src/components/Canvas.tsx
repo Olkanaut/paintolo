@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 import { useSelector } from "react-redux";
-import { mapStateToProps } from "../redux-store";
+import { selectNumberOfFigures, selectTransparency } from "../redux-store";
 
 interface ParamsFormProps {
   numberOfFigures: number;
@@ -130,7 +130,8 @@ const Canvas = forwardRef<{ saveImage: Function; changeSeed: Function }>(
     const ref = React.useRef<HTMLCanvasElement>(null);
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
-    const state = useSelector(mapStateToProps);
+    const number = useSelector(selectNumberOfFigures);
+    const transparency = useSelector(selectTransparency);
 
     let drawingTools: DrawingTools;
     if (ctx) {
@@ -150,7 +151,7 @@ const Canvas = forwardRef<{ saveImage: Function; changeSeed: Function }>(
 
       changeSeed: () => {
         if (ctx) {
-          drawingTools.updateColors(state.transparency);
+          drawingTools.updateColors(transparency);
           drawingTools.clearCanvas();
           drawingTools.drawList();
         }
@@ -161,8 +162,8 @@ const Canvas = forwardRef<{ saveImage: Function; changeSeed: Function }>(
       if (ctx) {
         drawingTools.clearCanvas();
         drawingTools.draw({
-          numberOfFigures: state.numberOfFigures,
-          transparency: state.transparency,
+          numberOfFigures: number,
+          transparency: transparency,
         });
       }
     });

@@ -3,7 +3,9 @@ import InputField from "./InputField";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { mapStateToProps } from "../redux-store";
+import { selectTransparency } from "../redux-store";
+import { selectNumberOfFigures } from "../redux-store";
+
 
 interface ParamsFormProps {
   className: string;
@@ -11,7 +13,8 @@ interface ParamsFormProps {
 
 const ParamsForm: FC<ParamsFormProps> = (props) => {
   const dispatch = useDispatch();
-  const state = useSelector(mapStateToProps);
+  const number = useSelector(selectNumberOfFigures);
+  const transparency = useSelector(selectTransparency);
 
   function handleNumberChange (value: number): void {
     dispatch({ type: "number-change", value });
@@ -25,14 +28,14 @@ const ParamsForm: FC<ParamsFormProps> = (props) => {
     <form>
       <InputField
         label="number of figures"
-        value={state.numberOfFigures}
+        value={number}
         min={1}
         max={100}
         setValue={handleNumberChange}
       />
       <InputField
         label="ephemerality"
-        value={state.transparency}
+        value={transparency}
         min={1}
         max={100}
         step={5}
